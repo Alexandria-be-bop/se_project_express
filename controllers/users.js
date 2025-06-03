@@ -10,7 +10,6 @@ const getUsers = (req, res) => {
     .catch((err) => {
       console.error(err);
       return res.status(err.statusCode).send({ message: err.message });
-      // todo make variable ^^^^
     });
 };
 
