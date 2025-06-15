@@ -75,20 +75,17 @@ const likeItem = (req, res) => {
       { new: true, runValidators: true }
     )
     .orFail()
-    .then((updatedItem) => {
-      return res.status(200).json({
-        message: "Liked",
-        data: updatedItem,
-      });
-    })
+    .then((updatedItem) =>
+      res.status(200).json({ message: "Liked", data: updatedItem })
+    )
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(404).json({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(400).json({ message: err.message });
-      } else {
-        return res.status(500).json({ message: err.message });
       }
+      if (err.name === "CastError") {
+        return res.status(400).json({ message: err.message });
+      }
+      return res.status(500).json({ message: err.message });
     });
 };
 
@@ -102,20 +99,17 @@ const disLikeItem = (req, res) => {
       { new: true, runValidators: true }
     )
     .orFail()
-    .then((updatedItem) => {
-      return res.status(200).json({
-        message: "",
-        data: updatedItem,
-      });
-    })
+    .then((updatedItem) =>
+      res.status(200).json({ message: "", data: updatedItem })
+    )
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(404).json({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(400).json({ message: err.message });
-      } else {
-        return res.status(500).json({ message: err.message });
       }
+      if (err.name === "CastError") {
+        return res.status(400).json({ message: err.message });
+      }
+      return res.status(500).json({ message: err.message });
     });
 };
 
