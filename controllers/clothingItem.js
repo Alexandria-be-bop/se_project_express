@@ -28,18 +28,18 @@ const getItems = (req, res) => {
     });
 };
 
-// Update
-const updateItem = (req, res) => {
-  const { id } = req.params;
-  const { imageUrl } = req.body;
+// // Update
+// const updateItem = (req, res) => {
+//   const { id } = req.params;
+//   const { imageUrl } = req.body;
 
-  clothingItem.findByIdAndUpdate(
-    id,
-    { $set: { imageUrl } }.orFail().then((id) => {
-      res.status(500).send({ message: err.message });
-    })
-  );
-};
+//   clothingItem.findByIdAndUpdate(
+//     id,
+//     { $set: { imageUrl } }.orFail().then(() => {
+//       res.status(500).send({ message: err.message });
+//     })
+//   );
+// };
 
 // Delete
 const deleteItem = (req, res) => {
@@ -122,7 +122,6 @@ const disLikeItem = (req, res) => {
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeItem,
   disLikeItem,
