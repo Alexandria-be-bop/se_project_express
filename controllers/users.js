@@ -22,7 +22,9 @@ const createUser = (req, res, next) => {
   const { name, avatar } = req.body;
   User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
-    .catch((err) => next(err));
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports = { getUsers, getUserById, createUser };

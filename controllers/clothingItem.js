@@ -5,7 +5,7 @@ const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   clothingItem
-    .create({ name, weather, imageUrl })
+    .create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => {
       res.send({ data: item });
     })
@@ -55,7 +55,7 @@ const likeItem = (req, res, next) => {
   clothingItem
     .findByIdAndUpdate(
       id,
-      { $addToSet: { likes: id } },
+      { $addToSet: { likes: req.user._id } },
       { new: true, runValidators: true }
     )
     .orFail()
@@ -71,7 +71,7 @@ const disLikeItem = (req, res, next) => {
   clothingItem
     .findByIdAndUpdate(
       id,
-      { $pull: { likes: id } },
+      { $pull: { likes: req.user._id } },
       { new: true, runValidators: true }
     )
     .orFail()

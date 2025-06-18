@@ -1,12 +1,15 @@
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, next) => {
   // Log the exception
   if (err.name === "DocumentNotFoundError") {
     res.status(404).send({ status: 404, message: err.message });
   } else if (err.name === "CastError") {
     res.status(400).send({ status: 400, message: err.message });
+  } else if (err.name === "ValidationError") {
+    res.status(400).send({ status: 400, message: "Invalid data" });
   } else {
     res.status(500).send({ status: 500, message: err.message });
   }
+  next();
 };
 
 module.exports = errorHandler;
