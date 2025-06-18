@@ -1,45 +1,28 @@
 const User = require("../models/user");
 
 //  GET users
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.status(200);
       res.send(users);
     })
-    .catch((err) => {
-      console.error(err);
-      return res.status(err.statusCode).send({ message: err.message });
-    });
+    .catch((err) => next(err));
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        res.status(404).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        res.status(400).send({ message: err.message });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
-    });
+    .catch((err) => next(err));
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar } = req.body;
   User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch((err) => next(err));
 };
 
 module.exports = { getUsers, getUserById, createUser };
