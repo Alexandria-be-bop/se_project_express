@@ -1,0 +1,19 @@
+const BAD_REQUEST = 400;
+const NOT_FOUND = 404;
+const DEFAULT = 500;
+
+const errorHandler = (err, req, res, next) => {
+  // Log the exception
+  if (err.name === "DocumentNotFoundError") {
+    res.status(NOT_FOUND).send({ status: 404, message: err.message });
+  } else if (err.name === "CastError") {
+    res.status(BAD_REQUEST).send({ status: 400, message: "Invalid parameter" });
+  } else if (err.name === "ValidationError") {
+    res.status(BAD_REQUEST).send({ status: 400, message: "Invalid data" });
+  } else {
+    res.status(DEFAULT).send({ status: 500, message: err.message });
+  }
+  next();
+};
+
+module.exports = { errorHandler, DEFAULT, NOT_FOUND, BAD_REQUEST };
