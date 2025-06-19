@@ -20,19 +20,6 @@ const getItems = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-// // Update
-// const updateItem = (req, res) => {
-//   const { id } = req.params;
-//   const { imageUrl } = req.body;
-
-//   clothingItem.findByIdAndUpdate(
-//     id,
-//     { $set: { imageUrl } }.orFail().then(() => {
-//       res.status(500).send({ message: err.message });
-//     })
-//   );
-// };
-
 // Delete
 const deleteItem = (req, res, next) => {
   const { id } = req.params;
