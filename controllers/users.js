@@ -1,30 +1,47 @@
 const User = require("../models/user");
-
-//  GET users
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => {
-      res.status(200);
-      res.send(users);
-    })
-    .catch((err) => next(err));
-};
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 
 const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 const createUser = (req, res, next) => {
-  const { name, avatar } = req.body;
-  User.create({ name, avatar })
+  bcrypt
+    .hash(req.body.password, 10)
+    .then((encryptedPassword) => {
+      const { name, avatar, email } = req.body;
+      return User.create({ name, avatar, email, password: encryptedPassword });
+    })
     .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
-module.exports = { getUsers, getUserById, createUser };
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error("Incorrect email or password"));
+      }
+      return bcrypt.compare(password, user.password);
+    })
+    .then((matched) => {
+      if (!matched) {
+        return Promise.reject(new Error("Incorrect email or password"));
+      }
+      const token = jwt.sign({ _id: email }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch(next);
+};
+
+module.exports = { getUserById, createUser, login };
