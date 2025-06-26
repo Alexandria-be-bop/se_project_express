@@ -3,12 +3,33 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 
-const getUserById = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
+const getCurrentUser = (req, res, next) => {
+  const { currentUser } = req.user;
+  User.findById(currentUser)
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch(next);
+};
+
+const updateProfile = async (req, res, next) => {
+  const { name, avatar } = req.body;
+  const userId = req.user._id;
+  try {
+    User.findByIdAndUpdate(
+      userId,
+      { name: name, avatar: avatar },
+      { new: true, runValidators: true }
+    )
+      .orFail()
+      .then((user) => {
+        // Return the updated user object
+        res.status(200).json({
+          _id: user._id,
+          name: user.name,
+          avatar: user.avatar,
+        });
+      });
+  } catch (next) {}
 };
 
 const createUser = (req, res, next) => {
@@ -18,25 +39,20 @@ const createUser = (req, res, next) => {
       const { name, avatar, email } = req.body;
       return User.create({ name, avatar, email, password: encryptedPassword });
     })
-    .then((user) => res.status(201).send(user))
+    .then((user) =>
+      res
+        .status(201)
+        .send({ name: user.name, avatar: user.avatar, email: user.email })
+    )
     .catch(next);
 };
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error("Incorrect email or password"));
-      }
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        return Promise.reject(new Error("Incorrect email or password"));
-      }
-      const token = jwt.sign({ _id: email }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
       res.send({ token });
@@ -44,4 +60,4 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
-module.exports = { getUserById, createUser, login };
+module.exports = { getCurrentUser, updateProfile, createUser, login };

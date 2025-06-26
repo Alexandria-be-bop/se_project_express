@@ -1,3 +1,4 @@
+const { NOT_FOUND } = require("../middlewares/constants");
 const clothingItem = require("../models/clothingItem");
 
 // Create
@@ -9,7 +10,7 @@ const createItem = (req, res, next) => {
     .then((item) => {
       res.send({ data: item });
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 // Fetch
@@ -17,23 +18,32 @@ const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((items) => res.status(200).send(items))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 // Delete
 const deleteItem = (req, res, next) => {
-  const { id } = req.params;
+  const { itemId } = req.params;
+  const userId = req.user._id;
 
-  clothingItem
-    .findByIdAndDelete(id)
-    .orFail()
+  ClothingItem.findById(itemId)
     .then((item) => {
-      res.status(200).json({
-        message: "Item deleted",
-        data: item,
-      });
+      if (!item) {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+
+      if (item.owner.toString() !== userId) {
+        return res.status(403).send({ message: "Access forbidden" });
+      }
+
+      return ClothingItem.findByIdAndDelete(itemId);
     })
-    .catch((err) => next(err));
+    .then((deletedItem) => {
+      if (deletedItem) {
+        res.send({ message: "Item deleted successfully" });
+      }
+    })
+    .catch(next);
 };
 
 // Like Item
@@ -49,7 +59,7 @@ const likeItem = (req, res, next) => {
     .then((updatedItem) =>
       res.status(200).json({ message: "Liked", data: updatedItem })
     )
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 // RemoveLike Item
@@ -65,7 +75,7 @@ const disLikeItem = (req, res, next) => {
     .then((updatedItem) =>
       res.status(200).json({ message: "", data: updatedItem })
     )
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports = {

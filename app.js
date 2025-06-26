@@ -16,7 +16,6 @@ mongoose
 // Middleware to parse the JSON format
 app.use(express.json());
 
-
 // Use the authentication middleware globally
 app.use((req, res, next) => {
   // Skip authentication for the following routes
