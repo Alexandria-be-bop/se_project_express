@@ -1,8 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const indexRouter = require("./routes/index");
-const { errorHandler } = require("./middlewares/constants");
-const { authorization } = require("./middlewares/auth");
+const { errorHandler } = require("./middlewares/errorHandler");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -15,18 +14,6 @@ mongoose
 
 // Middleware to parse the JSON format
 app.use(express.json());
-
-// Use the authentication middleware globally
-app.use((req, res, next) => {
-  // Skip authentication for the following routes
-  if (
-    (["/signin", "/signup"].includes(req.path) && req.method === "POST") ||
-    (req.method === "GET" && req.path === "/items")
-  ) {
-    return next(); // Skip auth check for these routes
-  }
-  authorization(req, res, next);
-});
 
 app.use("/", indexRouter);
 

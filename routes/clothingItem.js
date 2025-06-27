@@ -7,10 +7,12 @@ const {
   likeItem,
   disLikeItem,
 } = require("../controllers/clothingItem");
+const { tokenAuthorization } = require("../middlewares/authorization");
 
-router.post("/", createItem);
 router.get("/", getItems);
-router.delete("/:id", deleteItem);
+router.use(tokenAuthorization);
+router.post("/", createItem);
+router.delete("/:id", deleteItem); 
 router.put("/:id/likes", likeItem);
 router.delete("/:id/likes", disLikeItem);
 

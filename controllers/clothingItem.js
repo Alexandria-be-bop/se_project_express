@@ -1,4 +1,4 @@
-const { NOT_FOUND } = require("../middlewares/constants");
+const { NOT_FOUND, FORBIDDEN } = require("../middlewares/errorHandler");
 const clothingItem = require("../models/clothingItem");
 
 // Create
@@ -23,25 +23,20 @@ const getItems = (req, res, next) => {
 
 // Delete
 const deleteItem = (req, res, next) => {
-  const { itemId } = req.params;
+  const itemId = req.params.id;
   const userId = req.user._id;
 
-  ClothingItem.findById(itemId)
+  clothingItem
+    .findByIdAndDelete(itemId)
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
 
       if (item.owner.toString() !== userId) {
-        return res.status(403).send({ message: "Access forbidden" });
+        return res.status(FORBIDDEN).send({ message: "Access forbidden" });
       }
-
-      return ClothingItem.findByIdAndDelete(itemId);
-    })
-    .then((deletedItem) => {
-      if (deletedItem) {
-        res.send({ message: "Item deleted successfully" });
-      }
+      return res.status(200).send({ message: "Item deleted successfully" });
     })
     .catch(next);
 };

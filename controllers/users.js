@@ -1,10 +1,10 @@
-const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
 const getCurrentUser = (req, res, next) => {
-  const { currentUser } = req.user;
+  const currentUser = req.user;
   User.findById(currentUser)
     .orFail()
     .then((user) => res.status(200).send(user))
@@ -17,7 +17,7 @@ const updateProfile = async (req, res, next) => {
   try {
     User.findByIdAndUpdate(
       userId,
-      { name: name, avatar: avatar },
+      { name, avatar },
       { new: true, runValidators: true }
     )
       .orFail()
@@ -29,16 +29,32 @@ const updateProfile = async (req, res, next) => {
           avatar: user.avatar,
         });
       });
-  } catch (next) {}
+  } catch (err) {
+    next(err);
+  }
 };
 
 const createUser = (req, res, next) => {
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((encryptedPassword) => {
-      const { name, avatar, email } = req.body;
-      return User.create({ name, avatar, email, password: encryptedPassword });
+  const { name, avatar, email } = req.body;
+
+  // Check the database to see if email exists aready
+  User.findOne({ email })
+    .then((user) => {
+      // if user does exist, throw an error to trigger the catch block
+      if (user) {
+        const error = new Error("Email is already in use");
+        throw error;
+      }
+      return bcrypt.hash(req.body.password, 10);
     })
+    .then((encryptedPassword) =>
+      User.create({
+        name,
+        avatar,
+        email,
+        password: encryptedPassword,
+      })
+    )
     .then((user) =>
       res
         .status(201)
@@ -50,7 +66,12 @@ const createUser = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
+  if (!email || !password) {
+    const err = new Error("Email and password are required");
+    return next(err);
+  }
+
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
