@@ -5,7 +5,7 @@ WTWR (What to Wear?): Back End
 
 ## Functionality
 
-- User authentication and authorization (sign-up, login, token validation) `(Not added yet)`
+- User authentication and authorization (sign-up, login, token validation)
 - Add, delete, and view clothing items
 - Manage user profiles 
 - Serve data dynamically to front-end clients
@@ -14,16 +14,17 @@ WTWR (What to Wear?): Back End
 
 - Node.js and Express.js — for building the server and routing
 - MongoDB and Mongoose — for database operations and schema modeling
-- JWT (JSON Web Tokens) — for secure authentication `(Not added yet)`
-- CORS middleware — for handling cross-origin requests `(Not added yet)`
+- JWT (JSON Web Tokens) — for secure authentication
+- CORS middleware — for handling cross-origin requests `(Not added yet Downloaded)`
 - ESLint — for code linting and consistency
 
 ### Running the Project
 
 To start the server:
-
 `npm run start`
 
 To start the server with hot reloading:
-
 `npm run dev`
+
+To run eslint:
+`npx eslint`
