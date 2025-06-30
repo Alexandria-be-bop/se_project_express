@@ -15,7 +15,7 @@ WTWR (What to Wear?): Back End
 - Node.js and Express.js — for building the server and routing
 - MongoDB and Mongoose — for database operations and schema modeling
 - JWT (JSON Web Tokens) — for secure authentication
-- CORS middleware — for handling cross-origin requests `(Not added yet Downloaded)`
+- CORS middleware — for handling cross-origin requests
 - ESLint — for code linting and consistency
 
 ### Running the Project
