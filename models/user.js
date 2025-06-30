@@ -41,13 +41,13 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
     .select("+password")
     .then((user) => {
       if (!user) {
-        const error = new Error("ValidationError");
+        const error = new Error("Unauthorized");
         return Promise.reject(error);
       }
 
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          const error = new Error("ValidationError");
+          const error = new Error("Unauthorized");
           return Promise.reject(error);
         }
         return user;

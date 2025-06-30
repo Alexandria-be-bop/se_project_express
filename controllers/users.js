@@ -14,24 +14,24 @@ const getCurrentUser = (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   const { name, avatar } = req.body;
   const userId = req.user._id;
-  try {
-    User.findByIdAndUpdate(
-      userId,
-      { name, avatar },
-      { new: true, runValidators: true }
-    )
-      .orFail()
-      .then((user) => {
-        // Return the updated user object
-        res.status(200).json({
-          _id: user._id,
-          name: user.name,
-          avatar: user.avatar,
-        });
+
+  User.findByIdAndUpdate(
+    userId,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .then((user) => {
+      // Return the updated user object
+      res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
       });
-  } catch (err) {
-    next(err);
-  }
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const createUser = (req, res, next) => {

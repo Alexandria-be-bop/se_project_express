@@ -28,6 +28,10 @@ const errorHandler = (err, req, res, next) => {
       .send({ message: "User with this email already exists" });
   } else if (err.message === "Email is already in use") {
     res.status(CONFLICT).send({ status: CONFLICT, message: err.message });
+  } else if (err.message === "Unauthorized") {
+    res
+      .status(UNAUTHORIZED)
+      .send({ status: UNAUTHORIZED, message: err.message });
   } else {
     res.status(DEFAULT).send({ status: DEFAULT, message: err.message });
   }

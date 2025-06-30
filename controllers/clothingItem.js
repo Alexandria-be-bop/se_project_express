@@ -27,18 +27,21 @@ const deleteItem = (req, res, next) => {
   const userId = req.user._id;
 
   clothingItem
-    .findByIdAndDelete(itemId)
+    .findById(itemId)
+    .orFail()
     .then((item) => {
-      if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      if (String(item.owner) !== req.user._id) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "Only the owner can delete" });
       }
+      return item
+        .deleteOne()
+        .then(() => res.status(200).send({ message: "Successfully Deleted" }))
+        .catch()
 
-      if (item.owner.toString() !== userId) {
-        return res.status(FORBIDDEN).send({ message: "Access forbidden" });
-      }
-      return res.status(200).send({ message: "Item deleted successfully" });
-    })
-    .catch(next);
+        .catch(next);
+    });
 };
 
 // Like Item
