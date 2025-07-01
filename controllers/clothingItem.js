@@ -1,4 +1,4 @@
-const { NOT_FOUND, FORBIDDEN } = require("../middlewares/errorHandler");
+const { zFORBIDDEN } = require("../middlewares/errorHandler");
 const clothingItem = require("../models/clothingItem");
 
 // Create
@@ -30,7 +30,7 @@ const deleteItem = (req, res, next) => {
     .findById(itemId)
     .orFail()
     .then((item) => {
-      if (String(item.owner) !== req.user._id) {
+      if (String(item.owner) !== userId) {
         return res
           .status(FORBIDDEN)
           .send({ message: "Only the owner can delete" });
@@ -38,10 +38,10 @@ const deleteItem = (req, res, next) => {
       return item
         .deleteOne()
         .then(() => res.status(200).send({ message: "Successfully Deleted" }))
-        .catch()
 
         .catch(next);
-    });
+    })
+    .catch(next);
 };
 
 // Like Item
