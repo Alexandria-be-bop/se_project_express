@@ -1,4 +1,4 @@
-const { zFORBIDDEN } = require("../middlewares/errorHandler");
+const { FORBIDDEN } = require("../middlewares/errorHandler");
 const clothingItem = require("../models/clothingItem");
 
 // Create
