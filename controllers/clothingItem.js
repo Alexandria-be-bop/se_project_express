@@ -8,7 +8,7 @@ const createItem = (req, res, next) => {
   clothingItem
     .create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => {
-      res.send(item );
+      res.send(item);
     })
     .catch(next);
 };
@@ -17,7 +17,7 @@ const createItem = (req, res, next) => {
 const getItems = (req, res, next) => {
   clothingItem
     .find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.status(200).send(items.reverse()))
     .catch(next);
 };
 
