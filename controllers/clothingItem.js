@@ -1,4 +1,11 @@
-const { FORBIDDEN } = require("../middlewares/errorHandler");
+const {
+  FORBIDDEN,
+  OK,
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+} = require("../middlewares/errorHandler");
 const clothingItem = require("../models/clothingItem");
 
 // Create
@@ -10,15 +17,27 @@ const createItem = (req, res, next) => {
     .then((item) => {
       res.send(item);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // Fetch
 const getItems = (req, res, next) => {
   clothingItem
     .find({})
-    .then((items) => res.status(200).send(items.reverse()))
-    .catch(next);
+    .then((items) => res.status(OK).send(items.reverse()))
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // Delete
@@ -31,17 +50,21 @@ const deleteItem = (req, res, next) => {
     .orFail()
     .then((item) => {
       if (String(item.owner) !== userId) {
-        return res
-          .status(FORBIDDEN)
-          .send({ message: "Only the owner can delete" });
+        next(new ForbiddenError("User is not the owner"));
       }
       return item
         .deleteOne()
-        .then(() => res.status(200).send({ message: "Successfully Deleted" }))
+        .then(() => res.status(OK).send({ message: "Successfully Deleted" }))
 
         .catch(next);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // Like Item
@@ -55,9 +78,17 @@ const likeItem = (req, res, next) => {
     )
     .orFail()
     .then((updatedItem) =>
-      res.status(200).json({ message: "Liked", data: updatedItem })
+      res.status(OK).json({ message: "Liked", data: updatedItem })
     )
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else if (err.name === "ValidationError") {
+        next(new UnauthorizedError("Unauthorized"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // RemoveLike Item
@@ -71,9 +102,17 @@ const disLikeItem = (req, res, next) => {
     )
     .orFail()
     .then((updatedItem) =>
-      res.status(200).json({ message: "", data: updatedItem })
+      res.status(OK).json({ message: "", data: updatedItem })
     )
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else if (err.name === "ValidationError") {
+        next(new UnauthorizedError("Unauthorized"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {

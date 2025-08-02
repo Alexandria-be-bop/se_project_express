@@ -28,3 +28,7 @@ To start the server with hot reloading:
 
 To run eslint:
 `npx eslint`
+
+### domain names ###
+  - frontend: www.wtwr.cloe.cl / wtwr.cloe.cl
+  - backend: api.wtwr.cloe.cl

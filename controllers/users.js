@@ -2,13 +2,28 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
+const {
+  NotFoundError,
+  BadRequestError,
+  ConflictError,
+  UnauthorizedError,
+  OK,
+  CREATED,
+  DUPLICATE_KEY,
+} = require("../middlewares/errorHandler");
 
 const getCurrentUser = (req, res, next) => {
   const currentUser = req.user;
   User.findById(currentUser)
     .orFail()
-    .then((user) => res.status(200).send(user))
-    .catch(next);
+    .then((user) => res.status(OK).send(user))
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("User not found"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const updateProfile = async (req, res, next) => {
@@ -23,14 +38,22 @@ const updateProfile = async (req, res, next) => {
     .orFail()
     .then((user) => {
       // Return the updated user object
-      res.status(200).json({
+      res.status(OK).json({
         _id: user._id,
         name: user.name,
         avatar: user.avatar,
       });
     })
     .catch((err) => {
-      next(err);
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data"));
+      } else if (err.code === DUPLICATE_KEY) {
+        next(new ConflictError("Duplicate email error"));
+      } else if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("User not found"));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -42,8 +65,7 @@ const createUser = (req, res, next) => {
     .then((user) => {
       // if user does exist, throw an error to trigger the catch block
       if (user) {
-        const error = new Error("Email is already in use");
-        throw error;
+        next(new ConflictError("Duplicate email error"));
       }
       return bcrypt.hash(req.body.password, 10);
     })
@@ -57,18 +79,19 @@ const createUser = (req, res, next) => {
     )
     .then((user) =>
       res
-        .status(201)
+        .status(CREATED)
         .send({ name: user.name, avatar: user.avatar, email: user.email })
     )
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    const err = new Error("Email and password are required");
-    return next(err);
+    next(new BadRequestError("No email or Password"));
   }
 
   return User.findUserByCredentials(email, password)
@@ -78,7 +101,13 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.message === "Unauthorized") {
+        next(new UnauthorizedError("Incorrect credentials"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = { getCurrentUser, updateProfile, createUser, login };
